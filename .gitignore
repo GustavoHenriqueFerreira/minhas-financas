@@ -1,0 +1,60 @@
+# Dependencies
+/node_modules/
+/.pnp
+.pnp.*
+# Keep authored Yarn tooling if the project adopts Yarn.
+/.yarn/*
+!/.yarn/patches/
+!/.yarn/plugins/
+!/.yarn/releases/
+!/.yarn/versions/
+
+# Generated builds and framework state
+/dist/
+/.next/
+/.vinext/
+/out/
+next-env.d.ts
+*.tsbuildinfo
+
+# Test output
+/coverage/
+/test-results/
+/playwright-report/
+/screenshots/
+
+# Package-manager logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+*.log
+*.tmp
+
+# Local environment and keys (keep the public template)
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.test
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Personal financial exports and backups
+*backup*.json
+*backup*.zip
+*.ofx
+*.qif
+
+# Workspace scaffolding and publication archives
+/outputs/
+/.cache/
+/tmp/
+/.openai/hosting.json
+
+# OS metadata
+.DS_Store

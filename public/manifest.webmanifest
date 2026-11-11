@@ -1,0 +1,46 @@
+{
+  "id": "/",
+  "name": "Minhas Finanças",
+  "short_name": "Finanças",
+  "description": "Registre e acompanhe suas finanças pessoais.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "orientation": "portrait-primary",
+  "background_color": "#f6f5f9",
+  "theme_color": "#25243c",
+  "categories": ["finance", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Registrar gasto com VR",
+      "short_name": "Gasto VR",
+      "url": "/?action=vr",
+      "icons": [
+        { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }
+      ]
+    },
+    {
+      "name": "Registrar nova despesa",
+      "short_name": "Nova despesa",
+      "url": "/?action=expense",
+      "icons": [
+        { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }
+      ]
+    }
+  ],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
