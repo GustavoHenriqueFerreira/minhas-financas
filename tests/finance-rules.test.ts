@@ -3,11 +3,14 @@ import test from "node:test";
 import {
   benefitAdjustment,
   canonicalCategoryName,
+  countLabel,
   dueDate,
   importFingerprint,
   installmentAmount,
+  MIN_PERCENT_COMPARISON_BASE_CENTS,
   normalizeCategoryKey,
   parsePositiveCents,
+  percentageChangeForComparison,
 } from "../lib/finance-rules.ts";
 
 test("normaliza categorias equivalentes", () => {
@@ -57,4 +60,17 @@ test("detecta duplicidade mesmo com acentos diferentes na categoria", () => {
 test("calcula ajuste de conciliação do benefício", () => {
   assert.equal(benefitAdjustment(50000, 48750), -1250);
   assert.equal(benefitAdjustment(50000, 52000), 2000);
+});
+
+test("evita percentual enganoso quando a base anterior é muito pequena", () => {
+  assert.equal(MIN_PERCENT_COMPARISON_BASE_CENTS, 10_000);
+  assert.equal(percentageChangeForComparison(200110, 9990), "small-base");
+  assert.equal(percentageChangeForComparison(12000, 10000), 20);
+  assert.equal(percentageChangeForComparison(8000, 10000), -20);
+  assert.equal(percentageChangeForComparison(5000, 0), null);
+});
+
+test("flexiona contagens no singular e no plural", () => {
+  assert.equal(countLabel(1, "movimentação recuperada", "movimentações recuperadas"), "1 movimentação recuperada");
+  assert.equal(countLabel(2, "movimentação recuperada", "movimentações recuperadas"), "2 movimentações recuperadas");
 });

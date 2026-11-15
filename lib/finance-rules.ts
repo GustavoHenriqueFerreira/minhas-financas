@@ -68,3 +68,26 @@ export function benefitAdjustment(
 ) {
   return actualBalanceCents - recordedBalanceCents;
 }
+
+/**
+ * Bases abaixo de R$ 100,00 não geram percentual: pequenas variações absolutas
+ * podem produzir números extremos e pouco úteis para decisões financeiras.
+ */
+export const MIN_PERCENT_COMPARISON_BASE_CENTS = 10_000;
+
+export function percentageChangeForComparison(
+  currentCents: number,
+  previousCents: number,
+): number | "small-base" | null {
+  if (previousCents <= 0) return null;
+  if (previousCents < MIN_PERCENT_COMPARISON_BASE_CENTS) return "small-base";
+  return Math.round(((currentCents - previousCents) / previousCents) * 100);
+}
+
+export function countLabel(
+  count: number,
+  singular: string,
+  plural: string,
+) {
+  return `${count} ${count === 1 ? singular : plural}`;
+}

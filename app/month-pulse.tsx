@@ -1,5 +1,7 @@
 "use client";
 
+import { countLabel } from "../lib/finance-rules";
+
 type Row = { type: "income" | "expense"; amountCents: number };
 type Budget = { categoryKey: string; amountCents: number };
 const money = (value: number) =>
@@ -51,7 +53,7 @@ export default function MonthPulse({
       <div>
         <small>Gasto até agora</small>
         <strong>{money(expense)}</strong>
-        <span>{elapsedDays} dia(s) considerados</span>
+        <span>{countLabel(elapsedDays, "dia considerado", "dias considerados")}</span>
       </div>
       <div>
         <small>Média diária</small>
@@ -62,7 +64,9 @@ export default function MonthPulse({
         <small>Projeção do mês</small>
         <strong>{money(projection)}</strong>
         <span>
-          {isCurrent ? "Mantendo o ritmo atual" : "Média do mês encerrado"}
+          {isCurrent
+            ? "Estimativa linear somente dos lançamentos registrados; não é garantia"
+            : "Calculada somente com os lançamentos registrados no mês"}
         </span>
       </div>
       <div>
@@ -75,7 +79,7 @@ export default function MonthPulse({
         <span>
           {hasDailyBase
             ? remainingDays
-              ? `${remainingDays} dia(s) restantes`
+              ? countLabel(remainingDays, "dia restante", "dias restantes")
               : "Mês encerrado"
             : "Registre uma receita ou orçamento"}
         </span>

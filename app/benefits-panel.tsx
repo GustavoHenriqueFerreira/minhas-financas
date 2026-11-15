@@ -8,7 +8,7 @@ import {
   type BenefitMovement,
   type BenefitWallet,
 } from "./benefits-types";
-import { benefitAdjustment } from "../lib/finance-rules";
+import { benefitAdjustment, countLabel } from "../lib/finance-rules";
 
 const money = (value: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
@@ -72,7 +72,7 @@ export default function BenefitsPanel({
   const [setup, setSetup] = useState({
     openingBalance: "",
     openingDate: today(),
-    monthlyCredit: "1254,00",
+    monthlyCredit: "",
     creditDay: "",
   });
   const [config, setConfig] = useState(setup),
@@ -227,7 +227,7 @@ export default function BenefitsPanel({
       if (difference === 0) {
         setActualBalance("");
         onNotice(
-          "O saldo do app já confere com o Alelo. Nenhum ajuste foi necessário.",
+          "O saldo do app já confere com o cartão de benefício. Nenhum ajuste foi necessário.",
         );
         return;
       }
@@ -236,14 +236,14 @@ export default function BenefitsPanel({
         action: "movement",
         kind: "adjustment",
         date: today(),
-        description: "Conciliação com saldo Alelo",
+        description: "Conciliação com saldo do benefício",
         notes: `Saldo informado no cartão: ${money(actual)}`,
         amountCents: difference,
         clientKey: reconcileKey.current,
       });
       reconcileKey.current = null;
       setActualBalance("");
-      onNotice("Saldo do VR conciliado com o valor mostrado no Alelo.");
+      onNotice("Saldo do VR conciliado com o valor mostrado pela operadora.");
     });
   }
   function openEdit(item: BenefitMovement) {
@@ -439,7 +439,7 @@ export default function BenefitsPanel({
           {creditOverdue && (
             <p className="benefit-warning">
               O dia habitual do crédito já chegou e nenhum crédito foi
-              confirmado neste mês. Confira o Alelo.
+              confirmado neste mês. Confira o cartão de benefício.
             </p>
           )}
         </div>
@@ -498,7 +498,7 @@ export default function BenefitsPanel({
           </strong>
           <span>
             {daysToNext > 0
-              ? `Referência até ${dateLabel(nextDate)} (${daysToNext} dia(s)). Não é um limite obrigatório.`
+              ? `Referência até ${dateLabel(nextDate)} (${countLabel(daysToNext, "dia", "dias")}). Não é um limite obrigatório.`
               : "Confirme o crédito quando ele aparecer no cartão. A data habitual não cria saldo automaticamente."}
           </span>
         </div>
@@ -544,7 +544,7 @@ export default function BenefitsPanel({
         <div className="panel-head">
           <div>
             <span className="section-kicker">CONCILIAÇÃO</span>
-            <h2>Conferir com o Alelo</h2>
+            <h2>Conferir com a operadora</h2>
             <p>
               Informe o saldo atual mostrado no cartão. O app calcula e registra
               apenas a diferença, sem alterar sua renda financeira.
@@ -553,7 +553,7 @@ export default function BenefitsPanel({
         </div>
         <form className="reconcile-panel" onSubmit={saveReconciliation}>
           <label>
-            Saldo atual mostrado no Alelo (R$)
+            Saldo atual do cartão de benefício (R$)
             <input
               required
               inputMode="decimal"
