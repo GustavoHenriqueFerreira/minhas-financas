@@ -1,0 +1,75 @@
+name: Relatar um bug
+description: Informe um comportamento incorreto com uma reprodução sanitizada.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Obrigado pelo relato. Não inclua secrets, credenciais, backups ou dados financeiros reais.
+        Vulnerabilidades devem ser enviadas em particular pela área Security Advisories.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Verificações iniciais
+      options:
+        - label: Confirmei que não estou divulgando uma vulnerabilidade de segurança.
+          required: true
+        - label: Removi dados pessoais, financeiros e credenciais das evidências.
+          required: true
+        - label: Procurei uma Issue existente sobre o mesmo problema.
+          required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Passos para reprodução
+      description: Use uma conta de teste e dados totalmente fictícios.
+      placeholder: |
+        1. Acesse...
+        2. Clique em...
+        3. Observe...
+    validations:
+      required: true
+  - type: textarea
+    id: current
+    attributes:
+      label: Comportamento observado
+      description: Explique o que ocorreu e as mensagens exibidas.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportamento esperado
+      description: Explique o resultado que você esperava.
+    validations:
+      required: true
+  - type: dropdown
+    id: impact
+    attributes:
+      label: Impacto
+      description: Qual é o impacto do problema no uso da aplicação?
+      options:
+        - Bloqueia o uso
+        - Prejudica uma funcionalidade importante
+        - Causa inconveniente com alternativa disponível
+        - Impacto visual ou pequeno
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Ambiente
+      description: Informe navegador, sistema operacional e se ocorreu em produção ou localmente, sem caminhos locais.
+      placeholder: Firefox 132, Windows 11, produção
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidências sanitizadas
+      description: Inclua apenas logs, imagens ou exemplos sem dados pessoais, financeiros ou secretos.
+      placeholder: Cole evidências sanitizadas ou informe “não se aplica”.
+    validations:
+      required: true

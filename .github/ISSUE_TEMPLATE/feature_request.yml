@@ -1,0 +1,59 @@
+name: Sugerir uma funcionalidade
+description: Proponha uma melhoria com contexto, impacto e exemplos sanitizados.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Descreva a necessidade antes da solução. Não inclua dados financeiros reais, credenciais ou backups.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Verificações iniciais
+      options:
+        - label: Procurei uma Issue existente sobre a mesma sugestão.
+          required: true
+        - label: Removi dados pessoais, financeiros e credenciais dos exemplos.
+          required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexto e reprodução do fluxo atual
+      description: Explique como a necessidade aparece hoje, com passos e dados fictícios.
+      placeholder: |
+        1. Ao realizar...
+        2. Atualmente preciso...
+        3. A limitação aparece quando...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportamento esperado
+      description: Descreva o resultado desejado sem prescrever detalhes desnecessários de implementação.
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impacto
+      description: Quem se beneficia, com que frequência e qual problema seria resolvido?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativas consideradas
+      description: Explique soluções temporárias ou outras abordagens avaliadas.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidências sanitizadas
+      description: Inclua exemplos, rascunhos ou referências sem dados pessoais, financeiros ou secretos.
+      placeholder: Adicione evidências sanitizadas ou informe “não se aplica”.
+    validations:
+      required: true
