@@ -81,3 +81,54 @@ test("hardening SQL é invoker, atômico e sem elevação de privilégio", () =>
   assert.match(hardening, /revoke all on function .* from public, anon/i);
   assert.match(hardening, /grant execute .* to authenticated/i);
 });
+
+test("benefícios usam defaults seguros sem alterar configuração persistida", () => {
+  const benefits = read("app/benefits-panel.tsx");
+  assert.match(benefits, /monthlyCredit: ""/);
+  assert.doesNotMatch(benefits, /1254,00|Alelo/);
+  assert.match(benefits, /monthlyCredit: amountText\(wallet\.monthlyCreditCents\)/);
+});
+
+test("lançamento comum inicia em dinheiro e histórico mostra recentes primeiro", () => {
+  const app = read("app/finance-app.tsx");
+  assert.doesNotMatch(app, /minhas-financas-last-payment-source/);
+  assert.match(app, /paymentSource: "money"/);
+  assert.match(app, /openBenefitNew[\s\S]*paymentSource: "vr"/);
+  assert.match(app, /\[sort, setSort\] = useState\("date-desc"\)/);
+  assert.match(app, /sort === "date-asc"[\s\S]*b\.date\.localeCompare\(a\.date\)/);
+});
+
+test("projeção comunica limites e seletores expõem o estado", () => {
+  const pulse = read("app/month-pulse.tsx");
+  const app = read("app/finance-app.tsx");
+  assert.match(pulse, /somente dos lançamentos registrados/);
+  assert.match(pulse, /não é garantia/);
+  assert.match(app, /aria-label="Tipo do plano"/);
+  assert.match(app, /aria-pressed=\{planKind === "recurring"\}/);
+  assert.match(app, /aria-pressed=\{planKind === "installment"\}/);
+  assert.match(app, /aria-label="Tipo do lançamento"/);
+  assert.match(app, /aria-pressed=\{form\.type === "expense"\}/);
+  assert.match(app, /aria-pressed=\{form\.type === "income"\}/);
+});
+
+test("gráficos definem dimensões iniciais e mínimas responsivas", () => {
+  const app = read("app/finance-app.tsx");
+  const trend = read("app/trend-chart.tsx");
+  for (const source of [app, trend]) {
+    assert.match(source, /ResponsiveContainer[\s\S]*minWidth=\{0\}[\s\S]*minHeight=\{1\}/);
+    assert.match(source, /ResponsiveContainer[\s\S]*initialDimension=\{\{ width: \d+, height: \d+ \}\}/);
+  }
+});
+
+test("contagens visíveis não usam sufixos genéricos de plural", () => {
+  const sources = [
+    "app/benefits-panel.tsx",
+    "app/category-manager.tsx",
+    "app/finance-app.tsx",
+    "app/insight-card.tsx",
+    "app/month-pulse.tsx",
+    "app/plan-card.tsx",
+    "app/trend-chart.tsx",
+  ].map(read).join("\n");
+  assert.doesNotMatch(sources, /(?:dia|lançamento|registro|paga|pendente|importado|ignorado)\(s\)|possível\(is\)/);
+});

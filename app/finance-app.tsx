@@ -40,9 +40,11 @@ import {
   type BenefitWallet,
 } from "./benefits-types";
 import {
+  countLabel,
   importFingerprint,
   normalizeCategoryKey,
   parsePositiveCents,
+  percentageChangeForComparison,
 } from "../lib/finance-rules";
 import QuickActions from "./quick-actions";
 import MonthPulse from "./month-pulse";
@@ -327,7 +329,7 @@ export default function FinanceApp({ displayName }: { displayName: string }) {
   const [search, setSearch] = useState(""),
     [listType, setListType] = useState("all"),
     [listCategory, setListCategory] = useState("all"),
-    [sort, setSort] = useState("date-asc");
+    [sort, setSort] = useState("date-desc");
   const [modal, setModal] = useState(false),
     [editing, setEditing] = useState<Transaction | null>(null),
     [detail, setDetail] = useState<Transaction | null>(null),
@@ -554,14 +556,15 @@ export default function FinanceApp({ displayName }: { displayName: string }) {
           };
         })()
       : null;
-  const comparison = (current: number, previous: number) =>
-    !prior
-      ? "Selecione um mês para comparar"
-      : prior.rows.length
-        ? previous === 0
-          ? "Sem base percentual"
-          : `${current >= previous ? "+" : ""}${Math.round(((current - previous) / previous) * 100)}% vs. ${period === today().slice(0, 7) ? "mesmos dias do mês anterior" : "mês anterior"}`
-        : "Sem registros no mês anterior";
+  const comparison = (current: number, previous: number) => {
+    if (!prior) return "Selecione um mês para comparar";
+    if (!prior.rows.length) return "Sem registros no mês anterior";
+    const change = percentageChangeForComparison(current, previous);
+    if (change === null) return "Sem base percentual";
+    if (change === "small-base")
+      return "Base anterior muito pequena para comparação";
+    return `${change >= 0 ? "+" : ""}${change}% vs. ${period === today().slice(0, 7) ? "mesmos dias do mês anterior" : "mês anterior"}`;
+  };
   const periodName =
     period === "all"
       ? "todo o histórico"
@@ -729,12 +732,6 @@ export default function FinanceApp({ displayName }: { displayName: string }) {
   const openNew = useCallback((type: "income" | "expense" = "expense", from?: Transaction) => {
     const rememberedCategory =
       localStorage.getItem(`minhas-financas-last-category-${type}`) || "";
-    const rememberedPayment =
-      type === "expense" &&
-      benefitWallet &&
-      localStorage.getItem("minhas-financas-last-payment-source") === "vr"
-        ? "vr"
-        : "money";
     setEditing(null);
     setEditingBenefit(null);
     setDetail(null);
@@ -755,13 +752,13 @@ export default function FinanceApp({ displayName }: { displayName: string }) {
             category: categories.includes(rememberedCategory)
               ? rememberedCategory
               : "",
-            paymentSource: rememberedPayment,
+            paymentSource: "money",
           },
     );
     setFormKey(crypto.randomUUID());
     setFormError("");
     setModal(true);
-  }, [benefitWallet, categories]);
+  }, [categories]);
   function openPreset(description: string, categoryHint: string) {
     const normalizedHint = categoryHint
       .normalize("NFD")
@@ -902,10 +899,6 @@ export default function FinanceApp({ displayName }: { displayName: string }) {
         setPeriod((data.transaction as Transaction).date.slice(0, 7));
       }
       localStorage.setItem(
-        "minhas-financas-last-payment-source",
-        form.paymentSource,
-      );
-      localStorage.setItem(
         `minhas-financas-last-category-${form.type}`,
         category,
       );
@@ -1006,8 +999,12 @@ export default function FinanceApp({ displayName }: { displayName: string }) {
       )
         return;
       const result = await api("backup", "POST", data);
+      const restored = Number(result.restored) || 0;
+      const revived = Number(result.revived) || 0;
+      const benefitRestored = Number(result.benefitRestored) || 0;
+      const benefitRevived = Number(result.benefitRevived) || 0;
       setNotice(
-        `${result.restored} lançamentos recuperados, ${result.revived} reativados; VR: ${result.benefitRestored || 0} movimentações recuperadas, ${result.benefitRevived || 0} reativadas.`,
+        `${countLabel(restored, "lançamento recuperado", "lançamentos recuperados")}, ${countLabel(revived, "reativado", "reativados")}; VR: ${countLabel(benefitRestored, "movimentação recuperada", "movimentações recuperadas")}, ${countLabel(benefitRevived, "reativada", "reativadas")}.`,
       );
       await load();
     } catch (e) {
@@ -1051,7 +1048,7 @@ export default function FinanceApp({ displayName }: { displayName: string }) {
         ...parsed.errors,
         ...(parsed.entries.length !== uniques.length
           ? [
-              `${parsed.entries.length - uniques.length} possível(is) duplicidade(s) retirada(s) da prévia.`,
+              countLabel(parsed.entries.length - uniques.length, "possível duplicidade retirada da prévia.", "possíveis duplicidades retiradas da prévia."),
             ]
           : []),
       ]);
@@ -1078,7 +1075,7 @@ export default function FinanceApp({ displayName }: { displayName: string }) {
       }
       setImportEntries([]);
       setNotice(
-        `${imported} importado(s), ${skipped} ignorado(s) por duplicidade.`,
+        `${countLabel(imported, "importado", "importados")}, ${countLabel(skipped, "ignorado", "ignorados")} por duplicidade.`,
       );
       await load();
     } catch (e) {
@@ -1526,7 +1523,13 @@ export default function FinanceApp({ displayName }: { displayName: string }) {
                   {categoryData.length ? (
                     <>
                       <div className="donut-wrap">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer
+                          width="100%"
+                          height="100%"
+                          minWidth={0}
+                          minHeight={1}
+                          initialDimension={{ width: 215, height: 215 }}
+                        >
                           <PieChart>
                             <Pie
                               data={categoryData}
@@ -1675,7 +1678,7 @@ export default function FinanceApp({ displayName }: { displayName: string }) {
               <div className="panel-head">
                 <div>
                   <span className="section-kicker">HISTÓRICO</span>
-                  <h2>{visible.length} lançamento(s)</h2>
+                  <h2>{countLabel(visible.length, "lançamento", "lançamentos")}</h2>
                   <p>
                     Histórico contínuo de todos os meses. Toque em uma linha
                     para ver os detalhes.
@@ -1886,10 +1889,11 @@ export default function FinanceApp({ displayName }: { displayName: string }) {
                   pagamento.
                 </p>
                 <form onSubmit={savePlan}>
-                  <div className="type-toggle">
+                  <div className="type-toggle" role="group" aria-label="Tipo do plano">
                     <button
                       type="button"
                       className={planKind === "recurring" ? "selected" : ""}
+                      aria-pressed={planKind === "recurring"}
                       disabled={!!editingPlan}
                       onClick={() => setPlanKind("recurring")}
                     >
@@ -1898,6 +1902,7 @@ export default function FinanceApp({ displayName }: { displayName: string }) {
                     <button
                       type="button"
                       className={planKind === "installment" ? "selected" : ""}
+                      aria-pressed={planKind === "installment"}
                       disabled={!!editingPlan}
                       onClick={() => setPlanKind("installment")}
                     >
@@ -2232,7 +2237,7 @@ export default function FinanceApp({ displayName }: { displayName: string }) {
                   <div className="import-preview">
                     <strong>{importFile}</strong>
                     <p>
-                      {importEntries.length} registro(s) novo(s) na prévia.
+                      {countLabel(importEntries.length, "registro novo", "registros novos")} na prévia.
                       Nenhum registro existente será alterado.
                     </p>
                     {importErrors.length > 0 && (
@@ -2265,7 +2270,7 @@ export default function FinanceApp({ displayName }: { displayName: string }) {
                           }
                           onClick={() => void importNow()}
                         >
-                          Importar {importEntries.length} registro(s)
+                          Importar {countLabel(importEntries.length, "registro", "registros")}
                         </button>
                       </>
                     )}
@@ -2500,10 +2505,11 @@ export default function FinanceApp({ displayName }: { displayName: string }) {
               </button>
             </div>
             <form onSubmit={save}>
-              <div className="type-toggle">
+              <div className="type-toggle" role="group" aria-label="Tipo do lançamento">
                 <button
                   type="button"
                   className={form.type === "expense" ? "selected expense" : ""}
+                  aria-pressed={form.type === "expense"}
                   disabled={!!editingBenefit}
                   onClick={() =>
                     setForm({ ...form, type: "expense", category: "" })
@@ -2514,6 +2520,7 @@ export default function FinanceApp({ displayName }: { displayName: string }) {
                 <button
                   type="button"
                   className={form.type === "income" ? "selected income" : ""}
+                  aria-pressed={form.type === "income"}
                   disabled={!!editingBenefit}
                   onClick={() =>
                     setForm({

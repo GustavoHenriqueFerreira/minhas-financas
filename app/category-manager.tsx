@@ -8,6 +8,7 @@ import {
   type FormEvent,
 } from "react";
 import { Pencil, Plus, Trash2, X } from "lucide-react";
+import { countLabel } from "../lib/finance-rules";
 
 type CategoryType = "income" | "expense";
 type Definition = { id: string; name: string; type: CategoryType };
@@ -174,8 +175,7 @@ export default function CategoryManager({
             <div>
               <strong>{label(item.name)}</strong>
               <span>
-                {item.type === "expense" ? "Despesa" : "Receita"} · {item.count}{" "}
-                registro(s)
+                {item.type === "expense" ? "Despesa" : "Receita"} · {countLabel(item.count, "registro", "registros")}
               </span>
             </div>
             <button

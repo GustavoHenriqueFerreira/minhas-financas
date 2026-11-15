@@ -119,6 +119,10 @@ npm start          # executa o build de produção
 
 Antes de abrir um Pull Request, execute obrigatoriamente `npm test`, `npm run lint`, `npm run typecheck` e `npm run build`.
 
+### Interpretação das comparações e projeções
+
+Comparações percentuais só são exibidas quando o período anterior possui pelo menos R$ 100,00 de base. Abaixo desse valor, a interface mantém a diferença absoluta e informa que a base é pequena demais, evitando percentuais extremos com pouca utilidade. A projeção mensal é uma estimativa linear calculada somente a partir dos lançamentos registrados até o momento; ela não é uma previsão garantida nem substitui o acompanhamento dos registros.
+
 ## Backup, restauração e importação
 
 O backup completo pode ser baixado em **Configurações** no formato `minhas-financas-backup-v2`. O arquivo contém os registros financeiros da conta ativa, mas não inclui senha, tokens, e-mail ou `user_id`.
